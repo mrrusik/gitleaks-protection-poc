@@ -1,0 +1,51 @@
+# Pre-commit configuration for secret leak protection
+# Copy this file to individual repos as .pre-commit-config.yaml
+
+default_install_hook_types: [pre-commit, prepare-commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  # Gitleaks - Secret detection
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.4
+    hooks:
+      - id: gitleaks
+        name: gitleaks-scan
+        description: Detect hardcoded secrets using Gitleaks
+        entry: gitleaks detect --verbose --redact --format json --report-format json --report-path .gitleaks-report.json
+        language: golang
+        stages: [pre-commit]
+        pass_filenames: false
+        
+  # Custom tracking hook - marks that Gitleaks ran successfully
+  - repo: local
+    hooks:
+      - id: gitleaks-execution-tracker
+        name: gitleaks-execution-tracker
+        description: Track successful Gitleaks execution
+        entry: .githooks/track-gitleaks-execution.sh
+        language: script
+        stages: [prepare-commit-msg]
+        pass_filenames: false
+        always_run: true
+
+  # Standard hooks for additional protection
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        
+  # Additional secret detection patterns
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0  
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        additional_dependencies: ["gibberish-detector"]

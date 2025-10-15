@@ -1,0 +1,141 @@
+# Gitleaks configuration file
+# Copy this to individual repos as .gitleaks.toml
+
+title = "Gitleaks Configuration for Organization Secret Protection"
+
+[extend]
+# Extend default rules
+useDefault = true
+
+# Custom rules for organization-specific patterns
+[[rules]]
+id = "aws-access-key-custom"
+description = "AWS Access Key ID (Custom Pattern)"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "AWS"]
+
+[[rules]]
+id = "aws-secret-key-custom" 
+description = "AWS Secret Access Key (Custom Pattern)"
+regex = '''(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]'''
+tags = ["key", "AWS"]
+
+[[rules]]
+id = "github-token-custom"
+description = "GitHub Token (Custom Pattern)"
+regex = '''(?i)github(.{0,20})?(?-i)['\"]?[0-9a-zA-Z]{35,40}['\"]?'''
+tags = ["key", "GitHub"]
+
+[[rules]]
+id = "slack-webhook-custom"
+description = "Slack Webhook URL"
+regex = '''https://hooks\.slack\.com/services/[A-Z0-9]+/[A-Z0-9]+/[a-zA-Z0-9]+'''
+tags = ["webhook", "Slack"]
+
+[[rules]]
+id = "private-ssh-key"
+description = "Private SSH Key"
+regex = '''-----BEGIN (?:RSA |OPENSSH |DSA |EC |PGP )?PRIVATE KEY-----'''
+tags = ["key", "SSH"]
+
+[[rules]]
+id = "jwt-token"
+description = "JWT Token"
+regex = '''eyJ[A-Za-z0-9_\/+-]*\.eyJ[A-Za-z0-9_\/+-]*\.[A-Za-z0-9._\/+-]*'''
+tags = ["token", "JWT"]
+
+# Organization-specific patterns
+[[rules]]
+id = "hacken-api-key"
+description = "Hacken API Key Pattern"
+regex = '''(?i)hacken(.{0,20})?['\"][0-9a-f]{32}['\"]'''
+tags = ["key", "Hacken", "API"]
+
+[[rules]]
+id = "database-connection-string"
+description = "Database Connection String"
+regex = '''(?i)(postgres|mysql|mongodb|redis)://[^\s'"]+'''
+tags = ["database", "connection"]
+
+# File path allowlist (files to ignore)
+[allowlist]
+description = "Files and paths to ignore during scanning"
+files = [
+    # Test files and fixtures
+    '''.*test.*\.json$''',
+    '''.*test.*\.yaml$''',
+    '''.*test.*\.yml$''',
+    '''.*fixture.*\.json$''',
+    '''.*mock.*\.json$''',
+    
+    # Documentation
+    '''README.*\.md$''',
+    '''.*\.md$''',
+    
+    # Configuration templates (these often contain placeholder secrets)
+    '''.*template.*''',
+    '''.*example.*''',
+    
+    # Terraform plans and states should be in .gitignore anyway
+    '''.*\.tfplan$''',
+    '''.*\.tfstate$''',
+    '''.*\.tfstate\.backup$''',
+    
+    # Lock files
+    '''package-lock\.json$''',
+    '''yarn\.lock$''',
+    '''Pipfile\.lock$''',
+    
+    # Generated files
+    '''.*generated.*''',
+    '''.*\.generated\..*''',
+    
+    # Pre-commit files
+    '''\.gitleaks-report\.json$''',
+    '''\.gitleaks-tracker$''',
+    '''\.secrets\.baseline$''',
+]
+
+# Regex allowlist (patterns to ignore)
+regexes = [
+    # Common false positives
+    '''(example|sample|test|mock|fake|dummy|placeholder)''',
+    '''(password|secret|key|token).*[:=].*[\$\{]''',
+    '''AKIA00000000000000000''',  # Example AWS key
+    '''sk-[a-zA-Z0-9]{48}''',      # Example OpenAI key format (if not real)
+    
+    # Template variables and placeholders
+    '''\{\{.*\}\}''',              # Handlebars/Mustache templates
+    '''\$\{[^}]+\}''',             # Shell/env variable substitution
+    '''<[^>]+>''',                 # XML/HTML placeholders
+    '''%[^%]+%''',                 # Windows style variables
+    
+    # Base64 encoded strings that are clearly not secrets
+    '''data:image\/[^;]+;base64,''',
+]
+
+# Path allowlist (paths to ignore)
+paths = [
+    # Directories to skip entirely
+    '''^\.git/''',
+    '''^node_modules/''',
+    '''^vendor/''',
+    '''^\.venv/''',
+    '''^venv/''',
+    '''^env/''',
+    '''^\.env/''',
+    '''^build/''',
+    '''^dist/''',
+    '''^target/''',
+    '''^\.terraform/''',
+    '''^terraform\.tfstate\.d/''',
+    
+    # Test directories
+    '''^tests?/fixtures/''',
+    '''^tests?/mocks?/''',
+    '''^spec/fixtures/''',
+    
+    # Documentation
+    '''^docs?/''',
+    '''^documentation/''',
+]
