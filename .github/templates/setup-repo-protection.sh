@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-CORE_REPO_URL="https://raw.githubusercontent.com/hacken/haas-devops/main/.github/templates"
+CORE_REPO_URL="https://raw.githubusercontent.com/mrrusik/gitleaks-protection-poc/main/.github/templates"
 REPO_NAME=$(basename "$(git config --get remote.origin.url)" .git)
 
 log_info() {
