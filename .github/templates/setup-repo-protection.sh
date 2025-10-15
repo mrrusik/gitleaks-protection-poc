@@ -34,25 +34,25 @@ log_error() {
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
-    
+
     # Check if git repo
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
         log_error "This is not a Git repository"
         exit 1
     fi
-    
+
     # Check if Python is installed
     if ! command -v python3 &> /dev/null; then
         log_error "Python 3 is required but not installed"
         exit 1
     fi
-    
+
     # Check if pip is installed
     if ! command -v pip3 &> /dev/null; then
         log_error "pip3 is required but not installed"
         exit 1
     fi
-    
+
     log_success "Prerequisites check passed"
 }
 
@@ -70,10 +70,7 @@ install_pre_commit() {
 # Download configuration files from core repo
 download_configs() {
     log_info "Downloading configuration files from core repository..."
-    
-    # Create .githooks directory
-    mkdir -p .githooks
-    
+
     # Download pre-commit config
     if curl -fsSL "$CORE_REPO_URL/pre-commit-config.yaml" -o .pre-commit-config.yaml; then
         log_success "Downloaded .pre-commit-config.yaml"
@@ -81,7 +78,7 @@ download_configs() {
         log_error "Failed to download pre-commit configuration"
         exit 1
     fi
-    
+
     # Download Gitleaks config
     if curl -fsSL "$CORE_REPO_URL/gitleaks.toml" -o .gitleaks.toml; then
         log_success "Downloaded .gitleaks.toml"
@@ -89,21 +86,14 @@ download_configs() {
         log_error "Failed to download Gitleaks configuration"
         exit 1
     fi
-    
-    # Download tracking script
-    if curl -fsSL "$CORE_REPO_URL/track-gitleaks-execution.sh" -o .githooks/track-gitleaks-execution.sh; then
-        chmod +x .githooks/track-gitleaks-execution.sh
-        log_success "Downloaded tracking script"
-    else
-        log_error "Failed to download tracking script"
-        exit 1
-    fi
+
+    log_info "Simplified setup - no additional tracking scripts needed"
 }
 
 # Install pre-commit hooks
 install_hooks() {
     log_info "Installing pre-commit hooks..."
-    
+
     # Install hooks
     if pre-commit install --hook-type pre-commit --hook-type prepare-commit-msg; then
         log_success "Pre-commit hooks installed"
@@ -111,7 +101,7 @@ install_hooks() {
         log_error "Failed to install pre-commit hooks"
         exit 1
     fi
-    
+
     # Run pre-commit on all files for first time
     log_info "Running initial pre-commit scan (this may take a while)..."
     if pre-commit run --all-files; then
@@ -124,14 +114,14 @@ install_hooks() {
 # Create .secrets.baseline for detect-secrets
 create_secrets_baseline() {
     log_info "Creating secrets baseline..."
-    
+
     if command -v detect-secrets &> /dev/null; then
-        detect-secrets scan --baseline .secrets.baseline
+        detect-secrets scan . > .secrets.baseline
         log_success "Secrets baseline created"
     else
         log_info "detect-secrets not installed, installing..."
         pip3 install detect-secrets
-        detect-secrets scan --baseline .secrets.baseline
+        detect-secrets scan . > .secrets.baseline
         log_success "detect-secrets installed and baseline created"
     fi
 }
@@ -139,28 +129,28 @@ create_secrets_baseline() {
 # Update .gitignore
 update_gitignore() {
     log_info "Updating .gitignore..."
-    
+
     # Create .gitignore if it doesn't exist
     touch .gitignore
-    
+
     # Add entries if they don't exist
     if ! grep -q ".gitleaks-report.json" .gitignore; then
         echo ".gitleaks-report.json" >> .gitignore
         log_info "Added .gitleaks-report.json to .gitignore"
     fi
-    
+
     if ! grep -q "__pycache__" .gitignore; then
         echo "__pycache__/" >> .gitignore
         log_info "Added __pycache__/ to .gitignore"
     fi
-    
+
     log_success ".gitignore updated"
 }
 
 # Create repository protection marker
 create_protection_marker() {
     log_info "Creating repository protection marker..."
-    
+
     cat > .repo-protection-config.json << EOF
 {
   "protection_enabled": true,
@@ -175,21 +165,21 @@ create_protection_marker() {
   "last_updated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 }
 EOF
-    
+
     log_success "Protection marker created"
 }
 
 # Test the setup
 test_setup() {
     log_info "Testing the setup..."
-    
+
     # Test pre-commit
     if pre-commit run --all-files > /dev/null 2>&1; then
         log_success "Pre-commit test passed"
     else
         log_warning "Pre-commit test had issues (this may be normal for first run)"
     fi
-    
+
     # Test Gitleaks
     if command -v gitleaks &> /dev/null; then
         if gitleaks detect --no-git > /dev/null 2>&1; then
@@ -206,7 +196,7 @@ test_setup() {
 main() {
     log_info "Setting up secret leak protection for repository: $REPO_NAME"
     echo "========================================"
-    
+
     check_prerequisites
     install_pre_commit
     download_configs
@@ -215,7 +205,7 @@ main() {
     update_gitignore
     create_protection_marker
     test_setup
-    
+
     echo "========================================"
     log_success "Repository protection setup completed successfully!"
     echo

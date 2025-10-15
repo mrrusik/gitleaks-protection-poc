@@ -15,7 +15,7 @@ regex = '''AKIA[0-9A-Z]{16}'''
 tags = ["key", "AWS"]
 
 [[rules]]
-id = "aws-secret-key-custom" 
+id = "aws-secret-key-custom"
 description = "AWS Secret Access Key (Custom Pattern)"
 regex = '''(?i)aws(.{0,20})?(?-i)['\"][0-9a-zA-Z\/+]{40}['\"]'''
 tags = ["key", "AWS"]
@@ -67,29 +67,29 @@ files = [
     '''.*test.*\.yml$''',
     '''.*fixture.*\.json$''',
     '''.*mock.*\.json$''',
-    
+
     # Documentation
     '''README.*\.md$''',
     '''.*\.md$''',
-    
+
     # Configuration templates (these often contain placeholder secrets)
     '''.*template.*''',
     '''.*example.*''',
-    
+
     # Terraform plans and states should be in .gitignore anyway
     '''.*\.tfplan$''',
     '''.*\.tfstate$''',
     '''.*\.tfstate\.backup$''',
-    
+
     # Lock files
     '''package-lock\.json$''',
     '''yarn\.lock$''',
     '''Pipfile\.lock$''',
-    
+
     # Generated files
     '''.*generated.*''',
     '''.*\.generated\..*''',
-    
+
     # Pre-commit files
     '''\.gitleaks-report\.json$''',
     '''\.gitleaks-tracker$''',
@@ -103,13 +103,13 @@ regexes = [
     '''(password|secret|key|token).*[:=].*[\$\{]''',
     '''AKIA00000000000000000''',  # Example AWS key
     '''sk-[a-zA-Z0-9]{48}''',      # Example OpenAI key format (if not real)
-    
+
     # Template variables and placeholders
     '''\{\{.*\}\}''',              # Handlebars/Mustache templates
     '''\$\{[^}]+\}''',             # Shell/env variable substitution
     '''<[^>]+>''',                 # XML/HTML placeholders
     '''%[^%]+%''',                 # Windows style variables
-    
+
     # Base64 encoded strings that are clearly not secrets
     '''data:image\/[^;]+;base64,''',
 ]
@@ -129,12 +129,12 @@ paths = [
     '''^target/''',
     '''^\.terraform/''',
     '''^terraform\.tfstate\.d/''',
-    
+
     # Test directories
     '''^tests?/fixtures/''',
     '''^tests?/mocks?/''',
     '''^spec/fixtures/''',
-    
+
     # Documentation
     '''^docs?/''',
     '''^documentation/''',

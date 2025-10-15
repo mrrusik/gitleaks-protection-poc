@@ -22,7 +22,7 @@ create_tracking_metadata() {
   "gitleaks_execution": {
     "timestamp": "$TIMESTAMP",
     "commit_hash": "$COMMIT_HASH",
-    "branch": "$BRANCH", 
+    "branch": "$BRANCH",
     "user_email": "$USER_EMAIL",
     "pre_commit_version": "$(pre-commit --version 2>/dev/null || echo 'unknown')",
     "gitleaks_version": "$(gitleaks version 2>/dev/null | head -1 || echo 'unknown')",
@@ -48,24 +48,24 @@ add_tracking_signature() {
 # Main execution
 main() {
     echo "🔍 Tracking Gitleaks execution..."
-    
+
     # Check if Gitleaks actually ran (look for report file)
     if [ -f ".gitleaks-report.json" ]; then
         echo "✅ Gitleaks report found - scan completed successfully"
-        
+
         # Create tracking metadata
         create_tracking_metadata
-        
+
         # Add tracking signature to commit message
         add_tracking_signature
-        
+
         # Stage the tracker file
         git add "$TRACKER_FILE" 2>/dev/null || true
-        
+
         echo "📝 Gitleaks execution tracked successfully"
     else
         echo "⚠️  No Gitleaks report found - scan may have been skipped"
-        
+
         # Still create tracker but mark as potentially skipped
         cat > "$TRACKER_FILE" << EOF
 {
@@ -73,7 +73,7 @@ main() {
     "timestamp": "$TIMESTAMP",
     "commit_hash": "$COMMIT_HASH",
     "branch": "$BRANCH",
-    "user_email": "$USER_EMAIL", 
+    "user_email": "$USER_EMAIL",
     "scan_status": "possibly_skipped",
     "tracking_version": "1.0",
     "warning": "No gitleaks report found"
@@ -82,7 +82,7 @@ main() {
 EOF
         git add "$TRACKER_FILE" 2>/dev/null || true
     fi
-    
+
     # Clean up report file (don't commit it)
     rm -f ".gitleaks-report.json"
 }
