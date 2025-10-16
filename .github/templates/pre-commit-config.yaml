@@ -23,7 +23,7 @@ repos:
       - id: gitleaks-verified
         name: Gitleaks Verification Complete
         description: Add security verification trailer to commit
-        entry: git interpret-trailers --trailer "Gitleaks-Scan:passed" --trailer "Security-Check:✅ no-secrets-detected" --in-place
+        entry: git interpret-trailers --trailer "Pre-commit:✅ enabled" --in-place
         language: system
         stages: [prepare-commit-msg]
         pass_filenames: true
