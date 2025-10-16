@@ -31,6 +31,42 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Version comparison helper function
+version_compare() {
+    local version1=$1
+    local version2=$2
+    
+    # Convert versions to comparable format
+    local ver1_major=$(echo "$version1" | cut -d. -f1)
+    local ver1_minor=$(echo "$version1" | cut -d. -f2)
+    local ver1_patch=$(echo "$version1" | cut -d. -f3)
+    
+    local ver2_major=$(echo "$version2" | cut -d. -f1)
+    local ver2_minor=$(echo "$version2" | cut -d. -f2)
+    local ver2_patch=$(echo "$version2" | cut -d. -f3)
+    
+    # Compare major version
+    if [ "$ver1_major" -lt "$ver2_major" ]; then
+        return 1
+    elif [ "$ver1_major" -gt "$ver2_major" ]; then
+        return 0
+    fi
+    
+    # Compare minor version
+    if [ "$ver1_minor" -lt "$ver2_minor" ]; then
+        return 1
+    elif [ "$ver1_minor" -gt "$ver2_minor" ]; then
+        return 0
+    fi
+    
+    # Compare patch version
+    if [ "$ver1_patch" -lt "$ver2_patch" ]; then
+        return 1
+    fi
+    
+    return 0
+}
+
 # Check prerequisites
 check_prerequisites() {
     log_info "Checking prerequisites..."
@@ -51,6 +87,26 @@ check_prerequisites() {
     if ! command -v pip3 &> /dev/null; then
         log_error "pip3 is required but not installed"
         exit 1
+    fi
+
+    # Check if Go is installed
+    if ! command -v go &> /dev/null; then
+        log_error "Go is required for Gitleaks but not installed"
+        log_info "Please install Go from https://golang.org/doc/install"
+        exit 1
+    fi
+
+    # Check Go version compatibility
+    GO_VERSION=$(go version 2>/dev/null | sed -n 's/.*go\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' || echo "0.0.0")
+    REQUIRED_GO_VERSION="1.19.0"
+    
+    if ! version_compare "$GO_VERSION" "$REQUIRED_GO_VERSION"; then
+        log_error "Go version $GO_VERSION is too old. Minimum required: $REQUIRED_GO_VERSION"
+        log_info "Current Go version: $(go version)"
+        log_info "Please upgrade Go from https://golang.org/doc/install"
+        exit 1
+    else
+        log_info "Go version check passed: $GO_VERSION"
     fi
 
     log_success "Prerequisites check passed"
