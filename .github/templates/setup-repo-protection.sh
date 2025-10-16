@@ -109,8 +109,8 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check Go version compatibility
-    GO_VERSION=$(go version 2>/dev/null | sed -n 's/.*go\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' || echo "0.0.0")
+    # Check Go version compatibility  
+    GO_VERSION=$(go version 2>/dev/null | sed -n 's/go version go\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' || echo "0.0.0")
     REQUIRED_GO_VERSION="1.19.0"
     
     # Handle empty version extraction
