@@ -1,0 +1,12 @@
+{
+  "protection_enabled": true,
+  "setup_timestamp": "2025-10-16T16:12:46Z",
+  "setup_version": "1.0",
+  "repository": "gitleaks-protection-poc",
+  "features": {
+    "pre_commit_gitleaks": true,
+    "execution_tracking": true,
+    "detect_secrets": true
+  },
+  "last_updated": "2025-10-16T16:12:46Z"
+}
