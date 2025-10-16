@@ -209,12 +209,7 @@ update_gitignore() {
     # Create .gitignore if it doesn't exist
     touch .gitignore
 
-    # Add entries if they don't exist
-    if ! grep -q "__pycache__" .gitignore; then
-        echo "__pycache__/" >> .gitignore
-        log_info "Added __pycache__/ to .gitignore"
-    fi
-
+    
     log_success ".gitignore updated"
 }
 
