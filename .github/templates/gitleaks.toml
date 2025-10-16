@@ -99,7 +99,10 @@ tags = ["key", "private"]
 # Exclude common paths where they are intentionally stored and not a security risk.
 [rules.allowlist]
 paths = [
-    '''(?i)test''',
+    '''(?i)test/''',          # Only ignore test directories
+    '''(?i)tests/''',         # Only ignore tests directories
+    '''(?i).*_test\..*''',    # Only ignore files ending with _test.ext
+    '''(?i).*\.test\..*''',   # Only ignore files with .test. in name
     '''(?i)fixture''',
     '''(?i)example''',
     '''\.md$''',
