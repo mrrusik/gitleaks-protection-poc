@@ -1,0 +1,165 @@
+# Gitleaks configuration for production environments
+# This file defines rules for detecting secrets in your codebase.
+
+[general]
+# A prelude can be used for things like adding a custom message to the report.
+prelude = """
+Gitleaks found potential secrets in your code.
+Please review the findings and remove any hardcoded credentials.
+"""
+
+# Keywords are used by some rules to increase accuracy. If a line contains a secret
+# AND one of these keywords, it's more likely to be a true positive.
+[keywords]
+keywords = [
+    "key",
+    "secret",
+    "token",
+    "auth",
+    "password",
+    "credential",
+    "api_key",
+    "secret_key",
+    "access_key",
+]
+
+# --- Rules Section ---
+# Each [[rules]] block defines a pattern to search for.
+
+## Generic High-Entropy Keys
+[[rules]]
+description = "Generic API Key - High entropy string"
+id = "generic-api-key"
+regex = '''(?i)(api-key|apikey|access-token|accesstoken|auth-token|authtoken|secret-key|secretkey)[\s=:'"]+([a-zA-Z0-9\-_]{32,})['"]?'''
+entropy = 4.5
+tags = ["key", "api", "generic"]
+keywords = ["api-key", "apikey", "access-token", "accesstoken"]
+
+## AWS Credentials
+[[rules]]
+description = "AWS Access Key ID"
+id = "aws-access-key-id"
+regex = '''(A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}'''
+tags = ["key", "aws"]
+keywords = ["aws_access_key_id", "aws_key"]
+
+[[rules]]
+description = "AWS Secret Access Key"
+id = "aws-secret-access-key"
+regex = '''(?i)aws(.{0,20})?(key|secret|token)?['"]?[A-Za-z0-9/\+=]{40}['"]?'''
+entropy = 4.5
+tags = ["key", "aws"]
+keywords = ["aws_secret_access_key", "aws_secret"]
+
+## GitHub Tokens
+[[rules]]
+description = "GitHub Fine-Grained Personal Access Token"
+id = "github-pat-fine-grained"
+regex = '''github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{60}'''
+tags = ["key", "github"]
+
+[[rules]]
+description = "GitHub Classic Personal Access Token"
+id = "github-pat-classic"
+regex = '''ghp_[a-zA-Z0-9]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+description = "GitHub OAuth Access Token"
+id = "github-oauth"
+regex = '''gho_[a-zA-Z0-9]{36}'''
+tags = ["token", "github"]
+
+[[rules]]
+description = "GitHub App Token"
+id = "github-app-token"
+regex = '''(ghu|ghs)_[a-zA-Z0-9]{36}'''
+tags = ["token", "github"]
+
+## Slack Tokens
+[[rules]]
+description = "Slack Webhook URL"
+id = "slack-webhook"
+regex = '''https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}'''
+tags = ["webhook", "slack"]
+
+[[rules]]
+description = "Slack Bot/User Token"
+id = "slack-token"
+regex = '''xox[baprs]-([0-9a-zA-Z-]{10,48})'''
+tags = ["token", "slack"]
+
+## Private Keys
+[[rules]]
+description = "Private Key (RSA, SSH, PGP, etc.)"
+id = "private-key"
+regex = '''-----BEGIN((.|\n)*)PRIVATE KEY-----'''
+tags = ["key", "private"]
+# Private keys are often found in test data or documentation.
+# Exclude common paths where they are intentionally stored and not a security risk.
+[rules.allowlist]
+paths = [
+    '''(?i)test/''',          # Only ignore test directories
+    '''(?i)tests/''',         # Only ignore tests directories
+    '''(?i).*_test\..*''',    # Only ignore files ending with _test.ext
+    '''(?i).*\.test\..*''',   # Only ignore files with .test. in name
+    '''(?i)fixture''',
+    '''(?i)example''',
+    '''\.md$''',
+    '''\.pem$''',
+    '''\.key$'''
+]
+
+## Google Cloud Platform (GCP)
+[[rules]]
+description = "GCP Service Account Key"
+id = "gcp-service-account"
+regex = '''"private_key": "-----BEGIN PRIVATE KEY-----(.|\n)*-----END PRIVATE KEY-----"'''
+tags = ["key", "gcp"]
+# Allowlist for common config or test files
+[rules.allowlist]
+paths = ['''\.json$''']
+# This rule is specifically for the JSON structure, so we want to ignore single-line matches
+# that are not part of a valid JSON key-value pair. A regex here helps scope that.
+regexes = ['''"type": "service_account"'''] # Example of a positive indicator, not a direct allowlist here.
+
+[[rules]]
+description = "GCP API Key"
+id = "gcp-api-key"
+regex = '''AIza[0-9A-Za-z\\-_]{35}'''
+tags = ["key", "gcp"]
+
+## Stripe API Keys
+[[rules]]
+description = "Stripe API Key"
+id = "stripe-api-key"
+regex = '''(?i)(sk|pk)_(test|live)_[0-9a-zA-Z]{24,99}'''
+tags = ["key", "stripe"]
+keywords = ["stripe"]
+
+# --- Allowlist Section ---
+# Global allowlists apply to all rules. This is useful for ignoring
+# things like test files, package lock files, or documentation across the board.
+
+[allowlist]
+description = "Global allowlist for common non-secret files and paths"
+paths = [
+    '''go\.sum''',
+    '''package-lock\.json''',
+    '''yarn\.lock''',
+    '''Pipfile\.lock''',
+    '''poetry\.lock''',
+    '''Gemfile\.lock''',
+    '''(.)\.pb\.go''', # Ignore generated protobuf files
+    '''/testdata/''', # Ignore test data directories
+    '''/fixtures/''', # Ignore fixture directories
+    '''/examples/''',  # Ignore example directories
+    '''\.snap$''',      # Ignore snapshot test files
+    '''\.github/templates/''' # Ignore template files with example secrets
+]
+
+# You can also allowlist specific commits if a secret was found and
+# rotated, but you don't want to rewrite git history.
+# commits = [
+#     "a82f3d6291a5697ea36f7336b3b3a788f8d97a9f"
+# ]
