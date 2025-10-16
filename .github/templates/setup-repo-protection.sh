@@ -273,7 +273,7 @@ main() {
     download_configs
     # create_secrets_baseline  # Disabled for simplified setup
     install_hooks
-    update_gitignore
+    # update_gitignore
     # create_protection_marker  # Disabled for simplified setup
     test_setup
 

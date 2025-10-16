@@ -158,6 +158,7 @@ paths = [
     '''\.github/templates/''' # Ignore template files with example secrets
 ]
 
+#
 # You can also allowlist specific commits if a secret was found and
 # rotated, but you don't want to rewrite git history.
 # commits = [
