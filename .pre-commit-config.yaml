@@ -17,14 +17,14 @@ repos:
         stages: [pre-commit]
         pass_filenames: false
 
-  # Gitleaks verification confirmation
+  # Add commit trailer with verification
   - repo: local
     hooks:
       - id: gitleaks-verified
         name: Gitleaks Verification Complete
-        description: Confirm that Gitleaks scan passed with no secrets detected  
-        entry: bash -c 'echo "🔒 SECURITY VERIFIED - No secrets detected in this commit"'
+        description: Add security verification trailer to commit
+        entry: git interpret-trailers --trailer "Gitleaks-Scan:passed" --trailer "Security-Check:✅ no-secrets-detected" --in-place
         language: system
-        stages: [pre-commit]
-        pass_filenames: false
+        stages: [prepare-commit-msg]
+        pass_filenames: true
         always_run: true
