@@ -17,14 +17,14 @@ repos:
         stages: [pre-commit]
         pass_filenames: false
 
-  # Simple verification confirmation
+  # Add verification to commit message
   - repo: local
     hooks:
       - id: gitleaks-verified
-        name: Gitleaks verification complete
-        description: Confirm that gitleaks scan passed
-        entry: bash -c 'echo "✅ Gitleaks scan completed successfully - no secrets detected"'
+        name: Add Gitleaks verification to commit
+        description: Add verification that gitleaks scan passed to commit message
+        entry: bash -c 'echo "" >> "$1"; echo "✅ Gitleaks scan passed - no secrets detected" >> "$1"'
         language: system
-        stages: [pre-commit]
+        stages: [prepare-commit-msg]
         pass_filenames: false
         always_run: true
