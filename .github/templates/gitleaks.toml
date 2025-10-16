@@ -151,7 +151,8 @@ paths = [
     '''/testdata/''', # Ignore test data directories
     '''/fixtures/''', # Ignore fixture directories
     '''/examples/''',  # Ignore example directories
-    '''\.snap$'''      # Ignore snapshot test files
+    '''\.snap$''',      # Ignore snapshot test files
+    '''\.github/templates/''' # Ignore template files with example secrets
 ]
 
 # You can also allowlist specific commits if a secret was found and

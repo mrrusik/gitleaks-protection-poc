@@ -36,7 +36,12 @@ version_compare() {
     local version1=$1
     local version2=$2
     
-    # Convert versions to comparable format
+    # Handle empty inputs
+    if [ -z "$version1" ] || [ -z "$version2" ]; then
+        return 1
+    fi
+    
+    # Convert versions to comparable format, default to 0 if empty
     local ver1_major=$(echo "$version1" | cut -d. -f1)
     local ver1_minor=$(echo "$version1" | cut -d. -f2)
     local ver1_patch=$(echo "$version1" | cut -d. -f3)
@@ -44,6 +49,14 @@ version_compare() {
     local ver2_major=$(echo "$version2" | cut -d. -f1)
     local ver2_minor=$(echo "$version2" | cut -d. -f2)
     local ver2_patch=$(echo "$version2" | cut -d. -f3)
+    
+    # Set defaults if empty
+    ver1_major=${ver1_major:-0}
+    ver1_minor=${ver1_minor:-0}
+    ver1_patch=${ver1_patch:-0}
+    ver2_major=${ver2_major:-0}
+    ver2_minor=${ver2_minor:-0}
+    ver2_patch=${ver2_patch:-0}
     
     # Compare major version
     if [ "$ver1_major" -lt "$ver2_major" ]; then
@@ -99,6 +112,13 @@ check_prerequisites() {
     # Check Go version compatibility
     GO_VERSION=$(go version 2>/dev/null | sed -n 's/.*go\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' || echo "0.0.0")
     REQUIRED_GO_VERSION="1.19.0"
+    
+    # Handle empty version extraction
+    if [ -z "$GO_VERSION" ] || [ "$GO_VERSION" = "0.0.0" ]; then
+        log_error "Could not determine Go version"
+        log_info "Current Go output: $(go version)"
+        exit 1
+    fi
     
     if ! version_compare "$GO_VERSION" "$REQUIRED_GO_VERSION"; then
         log_error "Go version $GO_VERSION is too old. Minimum required: $REQUIRED_GO_VERSION"
