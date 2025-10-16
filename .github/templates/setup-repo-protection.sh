@@ -274,17 +274,23 @@ show_help() {
     echo "Repository Secret Leak Protection Setup"
     echo "Usage: $0 [options]"
     echo
+    echo "Prerequisites:"
+    echo "- Git repository"
+    echo "- Python 3 and pip3"
+    echo "- Go >= 1.19.0 (required for Gitleaks)"
+    echo
     echo "Options:"
     echo "  -h, --help    Show this help message"
     echo "  --test-only   Only run tests, don't install"
     echo "  --force       Force reinstall even if already configured"
     echo
     echo "This script will:"
-    echo "1. Install pre-commit if not present"
-    echo "2. Download configuration files from core repository"
-    echo "3. Set up Gitleaks for secret scanning (simplified setup)"
-    echo "4. Configure pre-commit hooks"
-    echo "5. Update .gitignore with necessary entries"
+    echo "1. Check prerequisites (Git, Python, Go version)"
+    echo "2. Install pre-commit if not present"
+    echo "3. Download configuration files from core repository"
+    echo "4. Set up Gitleaks for secret scanning (simplified setup)"
+    echo "5. Configure pre-commit hooks"
+    echo "6. Update .gitignore with necessary entries"
 }
 
 # Parse command line arguments
