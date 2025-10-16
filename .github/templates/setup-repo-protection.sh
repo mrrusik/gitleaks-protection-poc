@@ -134,11 +134,6 @@ update_gitignore() {
     touch .gitignore
 
     # Add entries if they don't exist
-    if ! grep -q ".gitleaks-report.json" .gitignore; then
-        echo ".gitleaks-report.json" >> .gitignore
-        log_info "Added .gitleaks-report.json to .gitignore"
-    fi
-
     if ! grep -q "__pycache__" .gitignore; then
         echo "__pycache__/" >> .gitignore
         log_info "Added __pycache__/ to .gitignore"
@@ -200,22 +195,22 @@ main() {
     check_prerequisites
     install_pre_commit
     download_configs
-    create_secrets_baseline
+    # create_secrets_baseline  # Disabled for simplified setup
     install_hooks
     update_gitignore
-    create_protection_marker
+    # create_protection_marker  # Disabled for simplified setup
     test_setup
 
     echo "========================================"
-    log_success "Repository protection setup completed successfully!"
+    log_success "Simplified repository protection setup completed successfully!"
     echo
     log_info "Next steps:"
     echo "1. Review and commit the new configuration files"
-    echo "2. All future commits will be automatically scanned for secrets"
+    echo "2. All future commits will be automatically scanned for secrets with Gitleaks"
     echo "3. If you need to bypass the scan (emergency only), use: git commit --no-verify"
     echo "4. To test the setup, try: pre-commit run --all-files"
     echo
-    log_warning "Important: Make sure to add .gitleaks-report.json to your .gitignore!"
+    log_info "Note: This simplified setup uses Gitleaks only, without detect-secrets baseline or tracking files"
 }
 
 # Help function
@@ -231,9 +226,9 @@ show_help() {
     echo "This script will:"
     echo "1. Install pre-commit if not present"
     echo "2. Download configuration files from core repository"
-    echo "3. Set up Gitleaks and detect-secrets for secret scanning"
-    echo "4. Install execution tracking"
-    echo "5. Configure pre-commit hooks"
+    echo "3. Set up Gitleaks for secret scanning (simplified setup)"
+    echo "4. Configure pre-commit hooks"
+    echo "5. Update .gitignore with necessary entries"
 }
 
 # Parse command line arguments
