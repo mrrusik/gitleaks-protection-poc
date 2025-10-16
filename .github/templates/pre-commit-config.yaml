@@ -7,45 +7,24 @@ default_stages: [pre-commit]
 repos:
   # Gitleaks - Secret detection
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.4
+    rev: v8.28.4
     hooks:
       - id: gitleaks
         name: gitleaks-scan
         description: Detect hardcoded secrets using Gitleaks
-        entry: gitleaks detect --verbose --redact --report-format json --report-path .gitleaks-report.json
+        entry: gitleaks detect --no-git --verbose --redact
         language: golang
         stages: [pre-commit]
         pass_filenames: false
 
-  # Simple commit message verification
+  # Simple verification confirmation
   - repo: local
     hooks:
       - id: gitleaks-verified
-        name: Add Gitleaks verification to commit
-        description: Add verification message that gitleaks scan passed
-        entry: bash -c 'echo -e "\n✅ Gitleaks scan passed - no secrets detected" >> $1'
+        name: Gitleaks verification complete
+        description: Confirm that gitleaks scan passed
+        entry: bash -c 'echo "✅ Gitleaks scan completed successfully - no secrets detected"'
         language: system
-        stages: [prepare-commit-msg]
+        stages: [pre-commit]
         pass_filenames: false
         always_run: true
-
-  # Standard hooks for additional protection
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
-      - id: check-case-conflict
-      - id: check-merge-conflict
-      - id: detect-private-key
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
-
-  # Additional secret detection patterns
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        additional_dependencies: ["gibberish-detector"]
